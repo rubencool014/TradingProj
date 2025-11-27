@@ -17,10 +17,10 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-14 z-30 h-[calc(100vh-3.5rem)] w-14 border-r bg-background lg:w-64">
-      <div className="space-y-4 py-4">
-        <div className="px-3 py-2">
-          <div className="space-y-1">
+    <aside className="fixed left-0 top-14 z-30 h-[calc(100vh-3.5rem)] w-14 border-r bg-background lg:w-64" suppressHydrationWarning>
+      <div className="space-y-4 py-4" suppressHydrationWarning>
+        <div className="px-3 py-2" suppressHydrationWarning>
+          <div className="space-y-1" suppressHydrationWarning>
             {sidebarItems.map((item) => {
               const Icon = item.icon;
               return (

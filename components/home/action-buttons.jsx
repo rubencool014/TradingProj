@@ -46,13 +46,14 @@ export default function ActionButtons({ userData }) {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4" suppressHydrationWarning>
       {actions.map((action) => (
         <Button
           key={action.id}
           onClick={() => handleAction(action.id)}
           className="h-24 flex flex-col items-center justify-center gap-2"
           variant="outline"
+          suppressHydrationWarning
         >
           <action.icon className="h-6 w-6" />
           {action.label}

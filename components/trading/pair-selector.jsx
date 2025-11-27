@@ -24,13 +24,14 @@ export default function PairSelector({ onPairChange, value }) {
       <SelectContent>
         {tradingPairs.map((pair) => (
           <SelectItem key={pair.wsSymbol} value={pair.wsSymbol}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" suppressHydrationWarning>
               <img
                 src={pair.logo}
                 alt={pair.name}
                 className="w-5 h-5"
                 width={20}
                 height={20}
+                suppressHydrationWarning
               />
               <span>
                 {pair.symbol} - {pair.name}

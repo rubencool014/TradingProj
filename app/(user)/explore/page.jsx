@@ -108,11 +108,12 @@ export default function Explore() {
               {filteredCryptos.map((crypto) => (
                 <TableRow key={crypto.wsSymbol}>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" suppressHydrationWarning>
                       <img
                         src={crypto.logo}
                         alt={crypto.name}
                         className="w-6 h-6"
+                        suppressHydrationWarning
                       />
                       <div>
                         <div className="font-medium">{crypto.name}</div>

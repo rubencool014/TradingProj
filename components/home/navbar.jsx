@@ -35,10 +35,12 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-14 items-center px-4">
-        <div className="flex items-center gap-2 font-semibold">
-          <Image src="/main/logo.svg" alt="Logo" width={32} height={32} />
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" suppressHydrationWarning>
+      <div className="flex h-14 items-center px-4" suppressHydrationWarning>
+        <div className="flex items-center gap-2 font-semibold" suppressHydrationWarning>
+          <div suppressHydrationWarning>
+            <Image src="/main/logo.svg" alt="Logo" width={32} height={32} />
+          </div>
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-4">

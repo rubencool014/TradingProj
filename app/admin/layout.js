@@ -71,11 +71,11 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col" suppressHydrationWarning>
       <Navbar />
-      <div className="flex h-[calc(100vh-4rem)] pt-16">
+      <div className="flex h-[calc(100vh-4rem)] pt-16" suppressHydrationWarning>
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-6 lg:pl-64" style={{width:'100%'}}>{children}</main>
+        <main className="flex-1 overflow-y-auto p-6 lg:pl-64" style={{width:'100%'}} suppressHydrationWarning>{children}</main>
       </div>
     </div>
   );
