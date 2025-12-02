@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { useState, useEffect } from "react";
+import { signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -28,7 +28,14 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
+  
+  // Configure Google Auth Provider
   const googleProvider = new GoogleAuthProvider();
+  googleProvider.addScope('profile');
+  googleProvider.addScope('email');
+  googleProvider.setCustomParameters({
+    prompt: 'select_account'
+  });
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -76,12 +83,62 @@ export default function SignIn() {
     }
   };
 
+  // Handle redirect result when returning from Google OAuth
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result && result.user) {
+          const user = result.user;
+          
+          // Create or update user document in Firestore
+          await createOrUpdateUserDocument(user);
+
+          // Update session cookie (this will also check admin status)
+          await updateSessionCookie();
+          
+          // Wait a bit to ensure cookie is set before navigation
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          // Check if user is admin for routing
+          const adminDoc = await getDoc(doc(db, "admins", user.uid));
+          const isAdmin = adminDoc.exists();
+
+          if (isAdmin) {
+            router.push("/admin");
+          } else {
+            router.push("/");
+          }
+        }
+      } catch (error) {
+        console.error("Error handling redirect result:", error);
+        setError("Failed to complete Google sign-in. Please try again.");
+      }
+    };
+
+    handleRedirectResult();
+  }, [router]);
+
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     setError("");
 
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      // Try popup first, fallback to redirect if popup fails
+      let result;
+      try {
+        result = await signInWithPopup(auth, googleProvider);
+      } catch (popupError) {
+        // If popup is blocked or fails, use redirect
+        if (popupError.code === "auth/popup-blocked" || popupError.code === "auth/popup-closed-by-user") {
+          // Use redirect method for production
+          await signInWithRedirect(auth, googleProvider);
+          // Don't set loading to false here as redirect will navigate away
+          return;
+        }
+        throw popupError;
+      }
+
       const user = result.user;
 
       // Create or update user document in Firestore
@@ -103,12 +160,23 @@ export default function SignIn() {
         router.push("/");
       }
     } catch (error) {
+      console.error("Google sign-in error:", error);
       if (error.code === "auth/popup-closed-by-user") {
         setError("Sign-in popup was closed. Please try again.");
       } else if (error.code === "auth/popup-blocked") {
-        setError("Popup was blocked. Please allow popups for this site.");
+        // Try redirect as fallback
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return; // Redirect will navigate away
+        } catch (redirectError) {
+          setError("Popup was blocked. Please allow popups or try again.");
+        }
+      } else if (error.code === "auth/network-request-failed") {
+        setError("Network error. Please check your connection and try again.");
+      } else if (error.code === "auth/unauthorized-domain") {
+        setError("This domain is not authorized. Please contact support.");
       } else {
-        setError("Failed to sign in with Google. Please try again.");
+        setError(`Failed to sign in with Google: ${error.message || "Please try again."}`);
       }
     } finally {
       setGoogleLoading(false);
