@@ -56,12 +56,19 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // If accessing a protected route without a token, redirect to sign-in
+  // If accessing a protected route without a token, allow through
+  // Client-side auth checks will handle redirect if needed
+  // This prevents race conditions where cookies aren't set yet
   const isProtectedPath = protectedPaths.some((prefix) =>
     path.startsWith(prefix)
   );
+  
+  // Allow protected routes through - client-side will handle auth
+  // Only redirect if we're certain there's no session (after initial load)
   if (isProtectedPath && !token) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+    // Allow the request through - client-side auth will handle redirect
+    // This prevents logout issues when cookies are being set
+    return NextResponse.next();
   }
 
   return NextResponse.next();

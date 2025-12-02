@@ -33,25 +33,35 @@ export async function updateSessionCookie() {
     const user = auth.currentUser;
     if (!user) {
       // Clear cookies if user is not authenticated
-      Cookies.remove("session");
-      Cookies.remove("isAdmin");
+      Cookies.remove("session", { path: '/' });
+      Cookies.remove("isAdmin", { path: '/' });
       return;
     }
 
     // Get fresh ID token (Firebase automatically refreshes if needed)
     const token = await user.getIdToken(true); // Force refresh if expired
     
-    // Update session cookie
-    Cookies.set("session", token, { expires: 7 }); // Expires in 7 days
+    // Update session cookie with proper settings for production
+    Cookies.set("session", token, { 
+      expires: 7,
+      sameSite: 'lax',
+      secure: window.location.protocol === 'https:',
+      path: '/'
+    });
     
     // Check and update admin status
     try {
       const adminDoc = await getDoc(doc(db, "admins", user.uid));
       const isAdmin = adminDoc.exists();
       if (isAdmin) {
-        Cookies.set("isAdmin", "true", { expires: 7 });
+        Cookies.set("isAdmin", "true", { 
+          expires: 7,
+          sameSite: 'lax',
+          secure: window.location.protocol === 'https:',
+          path: '/'
+        });
       } else {
-        Cookies.remove("isAdmin");
+        Cookies.remove("isAdmin", { path: '/' });
       }
     } catch (error) {
       console.error("Error checking admin status:", error);
@@ -60,8 +70,8 @@ export async function updateSessionCookie() {
   } catch (error) {
     console.error("Error updating session cookie:", error);
     // If token refresh fails, clear cookies
-    Cookies.remove("session");
-    Cookies.remove("isAdmin");
+    Cookies.remove("session", { path: '/' });
+    Cookies.remove("isAdmin", { path: '/' });
   }
 }
 
@@ -157,8 +167,8 @@ export function setupTokenRefresh() {
       }, 50 * 60 * 1000); // Refresh every 50 minutes
     } else {
       // User is signed out, clear cookies and interval
-      Cookies.remove("session");
-      Cookies.remove("isAdmin");
+      Cookies.remove("session", { path: '/' });
+      Cookies.remove("isAdmin", { path: '/' });
       if (tokenRefreshInterval) {
         clearInterval(tokenRefreshInterval);
         tokenRefreshInterval = null;

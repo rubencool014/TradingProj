@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/drawer";
 import TradingForm from "@/components/trading/trading-form";
 import { useToast } from "@/hooks/use-toast";
-import { ensureValidToken } from "@/utils/auth";
+import { ensureValidToken, updateSessionCookie } from "@/utils/auth";
 
 export default function Trade() {
   const searchParams = useSearchParams();
@@ -40,15 +40,25 @@ export default function Trade() {
     const defaultPair = getPairBySymbol(symbol) || tradingPairs[0];
     setSelectedPair(defaultPair);
 
-    const fetchUserData = async () => {
-      if (!auth.currentUser) return;
-      const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+    // Check auth state and set cookie if needed
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        // Redirect to sign-in if not authenticated
+        window.location.href = "/sign-in";
+        return;
+      }
+      
+      // Ensure cookie is set
+      await updateSessionCookie();
+      
+      // Fetch user data
+      const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         setUserData(userDoc.data());
       }
-    };
+    });
 
-    fetchUserData();
+    return () => unsubscribe();
   }, [searchParams]);
 
   const handleTrade = async (amount, duration, profitPercentage) => {

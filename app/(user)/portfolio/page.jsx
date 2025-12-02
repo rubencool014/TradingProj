@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
+import { updateSessionCookie } from "@/utils/auth";
 import PortfolioBalance from "@/components/portfolio/portfolio-balance";
 import OrderHistory from "@/components/portfolio/order-history";
 import PriceChart from "@/components/portfolio/price-chart";
@@ -10,10 +11,14 @@ export default function Portfolio() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (!user) {
         router.push("/sign-in");
+        return;
       }
+      
+      // Ensure cookie is set when user is authenticated
+      await updateSessionCookie();
     });
 
     return () => unsubscribe();

@@ -44,6 +44,9 @@ export default function SignIn() {
 
       // Update session cookie (this will also check admin status)
       await updateSessionCookie();
+      
+      // Wait a bit to ensure cookie is set before navigation
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Check if user is admin for routing
       const adminDoc = await getDoc(doc(db, "admins", userCredential.user.uid));
@@ -86,6 +89,9 @@ export default function SignIn() {
 
       // Update session cookie (this will also check admin status)
       await updateSessionCookie();
+      
+      // Wait a bit to ensure cookie is set before navigation
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Check if user is admin for routing
       const adminDoc = await getDoc(doc(db, "admins", user.uid));
