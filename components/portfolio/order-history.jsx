@@ -122,22 +122,53 @@ export default function OrderHistory() {
                             : ""
                         }`}
                       >
-                        {trade.status === "profit"
-                          ? `+$${(
+                        {(() => {
+                          const endTime = new Date(trade.endTime).getTime();
+                          const now = new Date().getTime();
+                          const hasEnded = now >= endTime;
+                          
+                          // Only show profit/loss if trade has ended and status is not active
+                          if (hasEnded && trade.status === "profit") {
+                            return `+$${(
                               (trade.amount * trade.profitPercentage) /
                               100
-                            ).toFixed(2)}`
-                          : trade.status === "loss"
-                          ? `-$${trade.amount}`
-                          : "Pending"}
+                            ).toFixed(2)}`;
+                          } else if (hasEnded && trade.status === "loss") {
+                            return `-$${trade.amount}`;
+                          } else if (hasEnded && trade.status === "expired") {
+                            return "$0.00";
+                          } else {
+                            return "Pending";
+                          }
+                        })()}
                       </div>
                     </div>
                     <div>
                       <div className="text-sm text-muted-foreground">
                         Status
                       </div>
-                      <Badge className={statusColors[trade.status]}>
-                        {trade.status.toUpperCase()}
+                      <Badge className={(() => {
+                        const endTime = new Date(trade.endTime).getTime();
+                        const now = new Date().getTime();
+                        const hasEnded = now >= endTime;
+                        
+                        // Show "active" until time ends, then show actual status
+                        if (!hasEnded || trade.status === "active") {
+                          return statusColors.active;
+                        }
+                        return statusColors[trade.status] || statusColors.active;
+                      })()}>
+                        {(() => {
+                          const endTime = new Date(trade.endTime).getTime();
+                          const now = new Date().getTime();
+                          const hasEnded = now >= endTime;
+                          
+                          // Show "ACTIVE" until time ends, then show actual status
+                          if (!hasEnded || trade.status === "active") {
+                            return "ACTIVE";
+                          }
+                          return trade.status.toUpperCase();
+                        })()}
                       </Badge>
                     </div>
                   </div>

@@ -176,7 +176,7 @@ export default function ActiveOrders() {
                       </div>
                       <Badge
                         variant={
-                          order.status === "active"
+                          order.status === "active" || order.timeLeft > 0
                             ? "outline"
                             : order.status === "profit"
                             ? "success"
@@ -185,12 +185,18 @@ export default function ActiveOrders() {
                             : "secondary"
                         }
                       >
-                        {order.status === "active" && order.timeLeft > 0
-                          ? "Active"
-                          : order.status === "active" && order.timeLeft === 0
-                          ? "Processing"
-                          : order.status.charAt(0).toUpperCase() +
-                            order.status.slice(1)}
+                        {(() => {
+                          // Always show "Active" until time ends
+                          if (order.timeLeft > 0) {
+                            return "Active";
+                          }
+                          // After time ends, show "Processing" if still active, otherwise show actual status
+                          if (order.status === "active") {
+                            return "Processing";
+                          }
+                          return order.status.charAt(0).toUpperCase() +
+                            order.status.slice(1);
+                        })()}
                       </Badge>
                     </div>
                   </div>

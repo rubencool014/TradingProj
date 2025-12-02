@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
@@ -25,31 +25,12 @@ const statusColors = {
 export function TradeStatusCell({ trade }) {
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const isUpdatingRef = useRef(false);
 
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const end = new Date(trade.endTime).getTime();
-      const now = new Date().getTime();
-      return Math.max(0, Math.floor((end - now) / 1000));
-    };
+  const updateStatus = useCallback(async (newStatus) => {
+    if (isUpdatingRef.current) return;
 
-    setTimeLeft(calculateTimeLeft());
-    const interval = setInterval(() => {
-      const remaining = calculateTimeLeft();
-      setTimeLeft(remaining);
-
-      // Auto-expire trade if time is up and status is still active
-      if (remaining === 0 && trade.status === "active") {
-        updateStatus("expired");
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [trade]);
-
-  const updateStatus = async (newStatus) => {
-    if (loading) return;
-
+    isUpdatingRef.current = true;
     setLoading(true);
     try {
       const tradeRef = doc(db, "trades", trade.id);
@@ -61,50 +42,146 @@ export function TradeStatusCell({ trade }) {
         return;
       }
 
+      // Admin can change status at any time
+      // Users will only see the result after trade time ends
+      // Balance will only be updated after trade time ends
+      
+      // Check if trade time has ended
+      const tradeEndTime = new Date(tradeData.endTime).getTime();
+      const currentTime = new Date().getTime();
+      const hasEnded = currentTime >= tradeEndTime;
+
       // Calculate balance update
       let balanceUpdate = 0;
       if (newStatus === "profit") {
+        // Profit = original amount + profit percentage
         balanceUpdate = (tradeData.amount * tradeData.profitPercentage) / 100;
       } else if (newStatus === "loss") {
-        balanceUpdate = -tradeData.amount;
+        // Loss = amount was already deducted, no need to add anything back
+        balanceUpdate = 0;
+      } else if (newStatus === "expired") {
+        // Expired = return original amount
+        balanceUpdate = tradeData.amount;
       }
 
-      // Update trade status
-      await updateDoc(tradeRef, {
-        status: newStatus,
-        updatedAt: new Date().toISOString(),
-        balanceUpdate,
-        adminUpdated: true, // Add this flag to indicate admin update
-      });
-
-      // Update user balance if trade has ended
-      if (new Date() >= new Date(trade.endTime)) {
+      // Update user balance ONLY if trade time has ended
+      // Note: The amount was already deducted when the trade was created
+      if (hasEnded) {
         const userRef = doc(db, "users", trade.userId);
         const userDoc = await getDoc(userRef);
         const userData = userDoc.data();
 
         if (newStatus === "profit") {
-          const newBalance =
-            userData.balance.usd + tradeData.amount + balanceUpdate;
+          // For profit: return the amount + add the profit
+          const profitAmount = (tradeData.amount * tradeData.profitPercentage) / 100;
+          const newBalance = parseFloat(userData.balance.usd) + parseFloat(tradeData.amount) + profitAmount;
           await updateDoc(userRef, {
             "balance.usd": newBalance,
           });
         } else if (newStatus === "loss") {
-          // No need to update balance for loss as it was already deducted
+          // For loss: amount was already deducted when trade was created, nothing to do
+          // Balance remains as is (already reduced)
         } else if (newStatus === "expired") {
-          // Return the original amount for expired trades
-          const newBalance = userData.balance.usd + tradeData.amount;
+          // For expired: return the original amount
+          const newBalance = parseFloat(userData.balance.usd) + parseFloat(tradeData.amount);
           await updateDoc(userRef, {
             "balance.usd": newBalance,
           });
         }
       }
+
+      // Update trade status (this happens regardless of whether time has ended)
+      await updateDoc(tradeRef, {
+        status: newStatus,
+        updatedAt: new Date().toISOString(),
+        balanceUpdate,
+        balanceUpdated: hasEnded, // Flag to track if balance was updated
+        adminUpdated: true, // Add this flag to indicate admin update
+      });
     } catch (error) {
       console.error("Error updating trade status:", error);
     } finally {
       setLoading(false);
+      isUpdatingRef.current = false;
     }
-  };
+  }, [trade.id, trade.userId]);
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const end = new Date(trade.endTime).getTime();
+      const now = new Date().getTime();
+      return Math.max(0, Math.floor((end - now) / 1000));
+    };
+
+    let balanceCheckDone = false;
+
+    const checkAndUpdateBalance = async () => {
+      // If trade time has ended and status is not active, check if balance needs updating
+      const endTime = new Date(trade.endTime).getTime();
+      const now = new Date().getTime();
+      const hasEnded = now >= endTime;
+      
+      if (hasEnded && trade.status !== "active" && !trade.balanceUpdated && !balanceCheckDone) {
+        balanceCheckDone = true; // Prevent multiple checks
+        // Trade ended, status was set by admin, but balance not updated yet
+        // Update balance now
+        try {
+          const tradeRef = doc(db, "trades", trade.id);
+          const tradeDoc = await getDoc(tradeRef);
+          const tradeData = tradeDoc.data();
+          
+          // Double-check status hasn't changed
+          if (tradeData.status === "active" || tradeData.balanceUpdated) {
+            return;
+          }
+
+          const userRef = doc(db, "users", trade.userId);
+          const userDoc = await getDoc(userRef);
+          const userData = userDoc.data();
+
+          if (tradeData.status === "profit") {
+            const profitAmount = (tradeData.amount * tradeData.profitPercentage) / 100;
+            const newBalance = parseFloat(userData.balance.usd) + parseFloat(tradeData.amount) + profitAmount;
+            await updateDoc(userRef, {
+              "balance.usd": newBalance,
+            });
+          } else if (tradeData.status === "expired") {
+            const newBalance = parseFloat(userData.balance.usd) + parseFloat(tradeData.amount);
+            await updateDoc(userRef, {
+              "balance.usd": newBalance,
+            });
+          }
+          // For loss, balance was already deducted, no update needed
+
+          // Mark balance as updated
+          await updateDoc(tradeRef, {
+            balanceUpdated: true,
+          });
+        } catch (error) {
+          console.error("Error updating balance when time ended:", error);
+          balanceCheckDone = false; // Reset on error so it can retry
+        }
+      }
+    };
+
+    setTimeLeft(calculateTimeLeft());
+    const interval = setInterval(() => {
+      const remaining = calculateTimeLeft();
+      setTimeLeft(remaining);
+
+      // Auto-expire trade if time is up and status is still active
+      if (remaining === 0 && trade.status === "active") {
+        updateStatus("expired");
+      }
+
+      // Check if balance needs updating when time ends (only once)
+      if (remaining === 0 && !balanceCheckDone) {
+        checkAndUpdateBalance();
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [trade, updateStatus]);
 
   return (
     <div className="flex items-center gap-2">
@@ -122,7 +199,12 @@ export function TradeStatusCell({ trade }) {
       {trade.status === "active" && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0" disabled={loading}>
+            <Button 
+              variant="ghost" 
+              className="h-8 w-8 p-0" 
+              disabled={loading}
+              title="Set trade result (users will see after time ends)"
+            >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
