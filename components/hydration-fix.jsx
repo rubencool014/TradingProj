@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
+import { setupTokenRefresh } from "@/utils/auth";
 
 // This component helps suppress hydration warnings from browser extensions
+// and sets up automatic token refresh
 export default function HydrationFix() {
   useEffect(() => {
     // Suppress React hydration warnings for browser extension attributes
@@ -18,8 +20,14 @@ export default function HydrationFix() {
         originalError.apply(console, args);
       };
       
+      // Set up token refresh listener
+      const unsubscribeAuth = setupTokenRefresh();
+      
       return () => {
         console.error = originalError;
+        if (unsubscribeAuth) {
+          unsubscribeAuth();
+        }
       };
     }
   }, []);

@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/drawer";
 import TradingForm from "@/components/trading/trading-form";
 import { useToast } from "@/hooks/use-toast";
+import { ensureValidToken } from "@/utils/auth";
 
 export default function Trade() {
   const searchParams = useSearchParams();
@@ -71,6 +72,17 @@ export default function Trade() {
     }
 
     try {
+      // Ensure we have a valid token before making Firestore operations
+      const hasValidToken = await ensureValidToken();
+      if (!hasValidToken) {
+        toast({
+          title: "Authentication Error",
+          description: "Please sign in again to continue",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const tradeId = `T${Date.now()}`;
       const startTime = new Date();
       const endTime = new Date(startTime.getTime() + duration * 1000);
@@ -108,11 +120,21 @@ export default function Trade() {
       setShowDrawer(false);
     } catch (error) {
       console.error("Error creating trade:", error);
-      toast({
-        title: "Error",
-        description: "Failed to start trade. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Handle authentication errors specifically
+      if (error.code === "permission-denied" || error.code === "unauthenticated") {
+        toast({
+          title: "Authentication Error",
+          description: "Your session has expired. Please refresh the page.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to start trade. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 

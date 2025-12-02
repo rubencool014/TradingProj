@@ -71,6 +71,7 @@ export default function Account() {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      // Cookies will be cleared by the token refresh listener
       router.push("/sign-in");
     } catch (error) {
       console.error("Error signing out:", error);
