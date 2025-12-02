@@ -37,7 +37,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="container mx-auto p-6 space-y-8" suppressHydrationWarning>
+    <div className="container mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8" suppressHydrationWarning>
       <WelcomeHeader userData={userData} />
       <ActionButtons userData={userData} />
       <MarketOverview />

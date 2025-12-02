@@ -139,9 +139,11 @@ export default function Trade() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <div className="flex items-center justify-between">
-        <PairSelector value={selectedPair} onPairChange={setSelectedPair} />
+    <div className="flex flex-col gap-4 p-2 sm:p-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4">
+        <div className="flex-1">
+          <PairSelector value={selectedPair} onPairChange={setSelectedPair} />
+        </div>
         <div className="flex gap-2">
           <Button
             onClick={() => {
@@ -149,10 +151,11 @@ export default function Trade() {
               setShowDrawer(true);
             }}
             variant="outline"
-            className="gap-2 text-green-500 hover:text-green-600"
+            className="gap-2 text-green-500 hover:text-green-600 flex-1 sm:flex-initial"
           >
             <ArrowUp className="h-4 w-4" />
-            TRADE UP
+            <span className="hidden sm:inline">TRADE UP</span>
+            <span className="sm:hidden">UP</span>
           </Button>
           <Button
             onClick={() => {
@@ -160,19 +163,20 @@ export default function Trade() {
               setShowDrawer(true);
             }}
             variant="outline"
-            className="gap-2 text-red-500 hover:text-red-600"
+            className="gap-2 text-red-500 hover:text-red-600 flex-1 sm:flex-initial"
           >
             <ArrowDown className="h-4 w-4" />
-            TRADE DOWN
+            <span className="hidden sm:inline">TRADE DOWN</span>
+            <span className="sm:hidden">DOWN</span>
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
-        <div className="col-span-3 h-[600px]">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="lg:col-span-3 h-[400px] sm:h-[500px] lg:h-[600px]">
           {selectedPair && <TradingChart pair={selectedPair} />}
         </div>
-        <div className="col-span-1 h-[600px]">
+        <div className="lg:col-span-1 h-[400px] sm:h-[500px] lg:h-[600px]">
           <ActiveOrders />
         </div>
       </div>

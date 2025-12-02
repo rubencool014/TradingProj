@@ -8,7 +8,7 @@ export default function UserLayout({ children }) {
       <Navbar />
       <div className="flex" suppressHydrationWarning>
         <Sidebar />
-        <main className="flex-1 pl-14 lg:pl-64" style={{width:'100%'}} suppressHydrationWarning>{children}</main>
+        <main className="flex-1 w-full" suppressHydrationWarning>{children}</main>
       </div>
     </div>
   );

@@ -71,9 +71,9 @@ export default function Explore() {
   );
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 sm:p-6 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Explore</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Explore</h2>
       </div>
 
       <div className="flex items-center gap-4">
@@ -93,69 +93,71 @@ export default function Explore() {
           <CardTitle>All Cryptocurrencies</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Asset</TableHead>
-                <TableHead className="text-right">Price</TableHead>
-                <TableHead className="text-right">24h Change</TableHead>
-                <TableHead className="text-right">Market Cap</TableHead>
-                <TableHead className="text-right">Volume (24h)</TableHead>
-                <TableHead className="text-right">Trade</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCryptos.map((crypto) => (
-                <TableRow key={crypto.wsSymbol}>
-                  <TableCell>
-                    <div className="flex items-center gap-2" suppressHydrationWarning>
-                      <img
-                        src={crypto.logo}
-                        alt={crypto.name}
-                        className="w-6 h-6"
-                        suppressHydrationWarning
-                      />
-                      <div>
-                        <div className="font-medium">{crypto.name}</div>
-                        <Badge variant="outline">{crypto.symbol}</Badge>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    ${crypto.current_price.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div
-                      className={cn(
-                        "flex items-center justify-end",
-                        crypto.price_change_percentage_24h > 0
-                          ? "text-green-500"
-                          : "text-red-500"
-                      )}
-                    >
-                      {crypto.price_change_percentage_24h > 0 ? (
-                        <ArrowUpRight className="mr-1 h-4 w-4" />
-                      ) : (
-                        <ArrowDownRight className="mr-1 h-4 w-4" />
-                      )}
-                      {Math.abs(crypto.price_change_percentage_24h).toFixed(2)}%
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    ${(crypto.market_cap / 1e9).toFixed(2)}B
-                  </TableCell>
-                  <TableCell className="text-right">
-                    ${(crypto.volume / 1e9).toFixed(2)}B
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button size="sm" onClick={() => handleTrade(crypto)}>
-                      Trade
-                    </Button>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Asset</TableHead>
+                  <TableHead className="text-right">Price</TableHead>
+                  <TableHead className="hidden sm:table-cell text-right">24h Change</TableHead>
+                  <TableHead className="hidden md:table-cell text-right">Market Cap</TableHead>
+                  <TableHead className="hidden lg:table-cell text-right">Volume (24h)</TableHead>
+                  <TableHead className="text-right">Trade</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredCryptos.map((crypto) => (
+                  <TableRow key={crypto.wsSymbol}>
+                    <TableCell>
+                      <div className="flex items-center gap-2" suppressHydrationWarning>
+                        <img
+                          src={crypto.logo}
+                          alt={crypto.name}
+                          className="w-6 h-6"
+                          suppressHydrationWarning
+                        />
+                        <div>
+                          <div className="font-medium text-sm sm:text-base">{crypto.name}</div>
+                          <Badge variant="outline" className="text-xs">{crypto.symbol}</Badge>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right text-sm sm:text-base">
+                      ${crypto.current_price.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-right">
+                      <div
+                        className={cn(
+                          "flex items-center justify-end",
+                          crypto.price_change_percentage_24h > 0
+                            ? "text-green-500"
+                            : "text-red-500"
+                        )}
+                      >
+                        {crypto.price_change_percentage_24h > 0 ? (
+                          <ArrowUpRight className="mr-1 h-4 w-4" />
+                        ) : (
+                          <ArrowDownRight className="mr-1 h-4 w-4" />
+                        )}
+                        {Math.abs(crypto.price_change_percentage_24h).toFixed(2)}%
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-right">
+                      ${(crypto.market_cap / 1e9).toFixed(2)}B
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell text-right">
+                      ${(crypto.volume / 1e9).toFixed(2)}B
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" onClick={() => handleTrade(crypto)}>
+                        Trade
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

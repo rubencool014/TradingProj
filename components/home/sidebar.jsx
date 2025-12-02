@@ -17,7 +17,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-14 z-30 h-[calc(100vh-3.5rem)] w-14 border-r bg-background lg:w-64" suppressHydrationWarning>
+    <aside className="hidden fixed left-0 top-14 z-30 h-[calc(100vh-3.5rem)] w-64 border-r bg-background" suppressHydrationWarning>
       <div className="space-y-4 py-4" suppressHydrationWarning>
         <div className="px-3 py-2" suppressHydrationWarning>
           <div className="space-y-1" suppressHydrationWarning>
@@ -35,7 +35,7 @@ export default function Sidebar() {
                 >
                   <Link href={item.href}>
                     <Icon className="h-5 w-5 mr-2" />
-                    <span className="hidden lg:inline-block">{item.name}</span>
+                    <span>{item.name}</span>
                   </Link>
                 </Button>
               );

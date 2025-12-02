@@ -69,15 +69,15 @@ export default function AdminTrades() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Trade Management</h1>
-        <div className="flex items-center gap-4">
-          <div className="relative">
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-4">
+        <h1 className="text-xl sm:text-2xl font-bold">Trade Management</h1>
+        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-initial">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by Coin Slug or User ID..."
-              className="pl-8 w-[300px]"
+              placeholder="Search..."
+              className="pl-8 w-full sm:w-[300px]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -93,7 +93,7 @@ export default function AdminTrades() {
         </div>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

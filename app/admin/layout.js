@@ -75,7 +75,7 @@ export default function AdminLayout({ children }) {
       <Navbar />
       <div className="flex h-[calc(100vh-4rem)] pt-16" suppressHydrationWarning>
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-6 lg:pl-64" style={{width:'100%'}} suppressHydrationWarning>{children}</main>
+        <main className="flex-1 w-full overflow-y-auto p-4 sm:p-6" suppressHydrationWarning>{children}</main>
       </div>
     </div>
   );

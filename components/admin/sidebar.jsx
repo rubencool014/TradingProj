@@ -15,7 +15,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-16 z-30 h-[calc(100vh-4rem)] w-64 border-r bg-background">
+    <aside className="hidden fixed left-0 top-16 z-30 h-[calc(100vh-4rem)] w-64 border-r bg-background">
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <div className="space-y-1">
