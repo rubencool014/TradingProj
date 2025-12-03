@@ -27,8 +27,6 @@ import {
   Wallet,
   LogOut,
   User,
-  ArrowDownLeft,
-  ArrowUpRight,
   CreditCard,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -93,12 +91,10 @@ export default function Account() {
   }
 
   const actions = [
-    { id: "buy", label: "Buy BTC", icon: ArrowDownLeft, color: "bg-green-500" },
-    { id: "sell", label: "Sell BTC", icon: ArrowUpRight, color: "bg-red-500" },
-    { id: "deposit", label: "Deposit USD", icon: Wallet, color: "bg-blue-500" },
+    { id: "deposit", label: "Deposit", icon: Wallet, color: "bg-blue-500" },
     {
       id: "withdraw",
-      label: "Withdraw USD",
+      label: "Withdraw",
       icon: CreditCard,
       color: "bg-orange-500",
     },
