@@ -14,11 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  ArrowUpDown,
   Wallet,
   CreditCard,
-  ArrowDownLeft,
-  ArrowUpRight,
 } from "lucide-react";
 
 export default function ActionButtons({ userData }) {
@@ -34,8 +31,6 @@ export default function ActionButtons({ userData }) {
   };
 
   const actions = [
-    { id: "buy", label: "Buy", icon: ArrowDownLeft, color: "bg-green-500" },
-    { id: "sell", label: "Sell", icon: ArrowUpRight, color: "bg-red-500" },
     { id: "deposit", label: "Deposit", icon: Wallet, color: "bg-blue-500" },
     {
       id: "withdraw",
@@ -46,7 +41,7 @@ export default function ActionButtons({ userData }) {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4" suppressHydrationWarning>
+    <div className="grid grid-cols-2 gap-4" suppressHydrationWarning>
       {actions.map((action) => (
         <Button
           key={action.id}
