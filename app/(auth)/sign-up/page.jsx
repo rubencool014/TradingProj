@@ -181,7 +181,7 @@ export default function SignUp() {
       } else if (error.code === "auth/network-request-failed") {
         setError("Network error. Please check your connection and try again.");
       } else if (error.code === "auth/unauthorized-domain") {
-        setError("This domain is not authorized. Please contact support.");
+        setError("Domain not authorized in Firebase. Add 'trading-proj-eta.vercel.app' to Firebase Console → Authentication → Settings → Authorized domains");
       } else {
         setError(`Failed to sign up with Google: ${error.message || "Please try again."}`);
       }

@@ -82,6 +82,39 @@ export default function ActiveOrders() {
     return Math.max(0, Math.floor((end - now) / 1000));
   };
 
+  const formatDuration = (seconds) => {
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    if (days > 0 && hours > 0) {
+      return `${days}d ${hours}h`;
+    }
+    return `${days} ${days === 1 ? 'day' : 'days'}`;
+  };
+
+  const formatTimeLeft = (seconds) => {
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}m ${secs}s`;
+    }
+    if (seconds < 86400) {
+      const hours = Math.floor(seconds / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      return `${hours}h ${mins}m`;
+    }
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (days > 0) {
+      return `${days}d ${hours}h ${mins}m`;
+    }
+    return `${hours}h ${mins}m`;
+  };
+
   if (loading) {
     return (
       <Card className="h-full">
@@ -147,14 +180,14 @@ export default function ActiveOrders() {
                       <div className="text-sm text-muted-foreground">
                         {order.timeLeft > 0 ? "Time Left" : "Duration"}
                       </div>
-                      <div className="font-medium flex items-center">
+                      <div className="font-medium flex items-center text-sm">
                         {order.timeLeft > 0 ? (
                           <>
-                            <Timer className="h-4 w-4 mr-1" />
-                            {order.timeLeft}s
+                            <Timer className="h-4 w-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{formatTimeLeft(order.timeLeft)}</span>
                           </>
                         ) : (
-                          `${order.duration}s`
+                          formatDuration(order.duration)
                         )}
                       </div>
                     </div>

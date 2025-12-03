@@ -106,6 +106,27 @@ export function TradeStatusCell({ trade }) {
     }
   }, [trade.id, trade.userId]);
 
+  const formatTimeLeft = (seconds) => {
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}m ${secs}s`;
+    }
+    if (seconds < 86400) {
+      const hours = Math.floor(seconds / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      return `${hours}h ${mins}m`;
+    }
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (days > 0) {
+      return `${days}d ${hours}h ${mins}m`;
+    }
+    return `${hours}h ${mins}m`;
+  };
+
   useEffect(() => {
     const calculateTimeLeft = () => {
       const end = new Date(trade.endTime).getTime();
@@ -190,9 +211,9 @@ export function TradeStatusCell({ trade }) {
       </Badge>
 
       {timeLeft > 0 && (
-        <div className="flex items-center text-sm text-muted-foreground">
-          <Timer className="h-4 w-4 mr-1" />
-          {timeLeft}s
+        <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
+          <Timer className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+          <span className="truncate">{formatTimeLeft(timeLeft)}</span>
         </div>
       )}
 

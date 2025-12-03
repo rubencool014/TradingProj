@@ -1,17 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DrawerFooter } from "@/components/ui/drawer";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 
+// Helper function to format duration for display
+const formatDuration = (seconds) => {
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) return `${seconds / 60}m`;
+  if (seconds < 86400) return `${seconds / 3600}h`;
+  const days = seconds / 86400;
+  return `${days} ${days === 1 ? 'day' : 'days'}`;
+};
+
 const TIME_OPTIONS = [
-  { value: "sixty", label: "60% 60 Sec", duration: 60, profit: 60 },
-  { value: "fourty", label: "40% 120 Sec", duration: 120, profit: 40 },
-  { value: "thirty", label: "30% 180 Sec", duration: 180, profit: 30 },
+  { value: "thirty", label: "30s", duration: 30, profit: 50, displayLabel: "30s" },
+  { value: "sixty", label: "60s", duration: 60, profit: 60, displayLabel: "60s" },
+  { value: "two-min", label: "120s", duration: 120, profit: 70, displayLabel: "2m" },
+  { value: "four-min", label: "240s", duration: 240, profit: 80, displayLabel: "4m" },
+  { value: "six-min", label: "360s", duration: 360, profit: 90, displayLabel: "6m" },
+  { value: "one-day", label: "1 Day", duration: 86400, profit: 150, displayLabel: "1 Day" },
+  { value: "two-day", label: "2 Days", duration: 172800, profit: 250, displayLabel: "2 Days" },
+  { value: "three-day", label: "3 Days", duration: 259200, profit: 350, displayLabel: "3 Days" },
 ];
 
 export default function TradingForm({
@@ -21,7 +34,7 @@ export default function TradingForm({
   onClose,
   variant = "default",
 }) {
-  const [selectedTime, setSelectedTime] = useState("sixty");
+  const [selectedTime, setSelectedTime] = useState("thirty");
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -52,23 +65,46 @@ export default function TradingForm({
 
   return (
     <form onSubmit={handleSubmit} className="px-4">
-      <Tabs
-        value={selectedTime}
-        onValueChange={setSelectedTime}
-        className="w-full"
-      >
-        <TabsList className="grid w-full grid-cols-3">
-          {TIME_OPTIONS.map((option) => (
-            <TabsTrigger
-              key={option.value}
-              value={option.value}
-              className="text-left"
-            >
-              {option.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <div className="space-y-3">
+        <Label>Select Duration</Label>
+        <div className="overflow-x-auto pb-2 -mx-4 px-4">
+          <div className="flex gap-2 min-w-max sm:grid sm:grid-cols-4 sm:min-w-0">
+            {TIME_OPTIONS.map((option) => {
+              const isSelected = selectedTime === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setSelectedTime(option.value)}
+                  className={`
+                    flex-shrink-0 w-[80px] sm:w-auto p-3 rounded-lg border-2 transition-all text-sm font-medium
+                    ${
+                      isSelected
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-background hover:bg-secondary"
+                    }
+                  `}
+                >
+                  <div className="text-center">
+                    <div className="font-semibold text-xs sm:text-sm">{option.displayLabel}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {option.profit}%
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="p-3 bg-secondary rounded-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 text-sm">
+            <span className="text-muted-foreground">Selected:</span>
+            <span className="font-semibold">
+              {getTimeDetails().displayLabel} - {getTimeDetails().profit}% Profit
+            </span>
+          </div>
+        </div>
+      </div>
 
       <div className="space-y-4 mt-4">
         <div className="space-y-2">
@@ -86,13 +122,19 @@ export default function TradingForm({
 
         {amount && (
           <div className="space-y-2 p-4 bg-secondary rounded-lg">
-            <div className="flex justify-between">
-              <span>Expected Profit:</span>
-              <span className="font-medium">${expectedProfit.toFixed(2)}</span>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Expected Profit:</span>
+              <span className="font-semibold text-green-500">+${expectedProfit.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Balance After Profit:</span>
-              <span className="font-medium">${totalAmount.toFixed(2)}</span>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Total Return:</span>
+              <span className="font-semibold">${totalAmount.toFixed(2)}</span>
+            </div>
+            <div className="pt-2 border-t border-border/50">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground">Duration:</span>
+                <span className="font-medium">{formatDuration(getTimeDetails().duration)}</span>
+              </div>
             </div>
           </div>
         )}

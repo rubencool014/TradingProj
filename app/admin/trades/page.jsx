@@ -25,6 +25,18 @@ import {
 import { Search, RefreshCcw, ArrowUp, ArrowDown } from "lucide-react";
 import { TradeStatusCell } from "@/components/admin/trade-status-cell";
 
+const formatDuration = (seconds) => {
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  if (days > 0 && hours > 0) {
+    return `${days}d ${hours}h`;
+  }
+  return `${days} ${days === 1 ? 'day' : 'days'}`;
+};
+
 export default function AdminTrades() {
   const [trades, setTrades] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -102,7 +114,7 @@ export default function AdminTrades() {
               <TableHead>Name</TableHead>
               <TableHead>Coin Slug</TableHead>
               <TableHead>Stack Amount</TableHead>
-              <TableHead>Time (Seconds)</TableHead>
+              <TableHead>Duration</TableHead>
               <TableHead>Profit %</TableHead>
               <TableHead>Choice</TableHead>
               <TableHead>Start Date</TableHead>
@@ -118,7 +130,7 @@ export default function AdminTrades() {
                 <TableCell>{trade.userName}</TableCell>
                 <TableCell>{trade.coinSlug}</TableCell>
                 <TableCell>${trade.amount}</TableCell>
-                <TableCell>{trade.duration}s</TableCell>
+                <TableCell className="text-sm">{formatDuration(trade.duration)}</TableCell>
                 <TableCell>{trade.profitPercentage}%</TableCell>
                 <TableCell>
                   {trade.direction === "up" ? (
