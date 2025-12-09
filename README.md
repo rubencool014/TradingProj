@@ -20,6 +20,19 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Setting Up the First Admin
+
+**Important**: Before you can use the admin features, you need to create the first administrator account.
+
+### Quick Setup (Recommended)
+
+1. Sign up or sign in to your application
+2. Navigate to `/setup-admin`
+3. Follow the on-screen instructions to create the first admin
+4. Once created, you'll have access to the admin panel at `/admin`
+
+For detailed instructions and alternative methods, see [SETUP_FIRST_ADMIN.md](./SETUP_FIRST_ADMIN.md).
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

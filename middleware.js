@@ -5,6 +5,9 @@ export async function middleware(request) {
 
   // Public paths that don't require authentication
   const publicPaths = ["/", "/explore", "/sign-in", "/sign-up"];
+  
+  // Setup path - accessible to authenticated users (for first admin creation)
+  const setupPath = "/setup-admin";
 
   // Protected routes that require authentication
   const protectedPaths = ["/trade", "/portfolio", "/account"];
@@ -28,6 +31,11 @@ export async function middleware(request) {
   // Get the token from the cookies
   const token = request.cookies.get("session");
   const isAdmin = request.cookies.get("isAdmin");
+
+  // Allow access to setup page if authenticated (for first admin creation)
+  if (path === setupPath && token) {
+    return NextResponse.next();
+  }
 
   // If user is an admin, only allow access to admin routes and public paths
   if (isAdmin?.value === "true") {
