@@ -13,6 +13,7 @@ export async function middleware(request) {
     "/admin/trades",
     "/admin/users",
     "/admin/manage",
+    "/admin/feedback",
   ];
 
   // Skip middleware for api routes and static files

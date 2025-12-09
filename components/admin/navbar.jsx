@@ -238,11 +238,12 @@ import {
 } from "@/components/ui/drawer";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Users, LineChart } from "lucide-react";
+import { Users, LineChart, MessageSquare } from "lucide-react";
 
 const sidebarItems = [
   { name: "Trades", href: "/admin/trades", icon: LineChart },
   { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Feedback", href: "/admin/feedback", icon: MessageSquare },
 ];
 
 export default function Navbar() {

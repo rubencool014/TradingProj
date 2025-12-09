@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { UserCircle, Wallet, Menu, X } from "lucide-react";
+import { UserCircle, Wallet, Menu, X, MessageSquare } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 import {
@@ -19,6 +19,7 @@ import {
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Home, Globe, LineChart, BarChart2 } from "lucide-react";
+import FeedbackDialog from "@/components/feedback/feedback-dialog";
 
 const sidebarItems = [
   { name: "Home", href: "/", icon: Home },
@@ -31,6 +32,7 @@ export default function Navbar() {
   const [user, setUser] = useState(null);
   const [balance, setBalance] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -108,6 +110,17 @@ export default function Navbar() {
               <span>${balance.usd?.toLocaleString() ?? "0.00"}</span>
             </div>
           )}
+          {user && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setFeedbackDialogOpen(true)}
+              title="Submit Feedback"
+            >
+              <MessageSquare className="h-5 w-5" />
+              <span className="sr-only">Feedback</span>
+            </Button>
+          )}
           <ThemeToggle />
           <Button variant="ghost" size="icon" asChild>
             <Link href="/account">
@@ -117,6 +130,7 @@ export default function Navbar() {
           </Button>
         </div>
       </div>
+      <FeedbackDialog open={feedbackDialogOpen} onOpenChange={setFeedbackDialogOpen} />
     </nav>
   );
 }
