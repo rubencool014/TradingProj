@@ -28,6 +28,7 @@ import {
   LogOut,
   User,
   CreditCard,
+  Award,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -141,18 +142,54 @@ export default function Account() {
               </div>
             </div>
 
+            <div>
+              <h3 className="text-lg font-medium flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                Credit Score
+              </h3>
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-1 gap-4">
+                <div className="bg-secondary p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Current Credit Score</p>
+                  <p className="text-2xl font-bold">
+                    {userData?.creditScore || 100}
+                  </p>
+                  {userData?.creditScoreChanges && userData.creditScoreChanges.length > 0 && (
+                    <div className="mt-3 space-y-1">
+                      <p className="text-xs text-muted-foreground mb-2">Recent Changes:</p>
+                      {userData.creditScoreChanges.slice(-5).reverse().map((change, index) => (
+                        <div
+                          key={index}
+                          className={`text-xs ${
+                            change < 0 ? "text-red-500" : "text-green-500"
+                          }`}
+                        >
+                          {change > 0 ? "+" : ""}
+                          {change} points
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
-              {actions.map((action) => (
-                <Button
-                  key={action.id}
-                  onClick={() => router.push("/to-be-implemented")}
-                  className="h-16"
-                  variant="outline"
-                >
-                  <action.icon className="mr-2 h-4 w-4" />
-                  {action.label}
-                </Button>
-              ))}
+              <Button
+                onClick={() => router.push("/deposit")}
+                className="h-16"
+                variant="outline"
+              >
+                <Wallet className="mr-2 h-4 w-4" />
+                Deposit
+              </Button>
+              <Button
+                onClick={() => router.push("/withdraw")}
+                className="h-16"
+                variant="outline"
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                Withdraw
+              </Button>
             </div>
 
             <Button

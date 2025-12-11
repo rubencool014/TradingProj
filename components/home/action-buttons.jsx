@@ -27,7 +27,13 @@ export default function ActionButtons({ userData }) {
   if (!userData) return null;
 
   const handleAction = (actionId) => {
-    router.push("/to-be-implemented");
+    if (actionId === "deposit") {
+      router.push("/deposit");
+    } else if (actionId === "withdraw") {
+      router.push("/withdraw");
+    } else {
+      router.push("/to-be-implemented");
+    }
   };
 
   const actions = [

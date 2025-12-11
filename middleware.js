@@ -10,13 +10,14 @@ export async function middleware(request) {
   const setupPath = "/setup-admin";
 
   // Protected routes that require authentication
-  const protectedPaths = ["/trade", "/portfolio", "/account"];
+  const protectedPaths = ["/trade", "/portfolio", "/account", "/deposit", "/withdraw"];
   const adminPaths = [
     "/admin",
     "/admin/trades",
     "/admin/users",
     "/admin/manage",
     "/admin/feedback",
+    "/admin/withdrawals",
   ];
 
   // Skip middleware for api routes and static files
