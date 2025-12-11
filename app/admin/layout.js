@@ -24,6 +24,12 @@ export default function AdminLayout({ children }) {
       }
 
       if (user) {
+        if (!user.emailVerified) {
+          router.push("/verify-email");
+          setLoading(false);
+          return;
+        }
+
         try {
           const adminDoc = await getDoc(doc(db, "admins", user.uid));
           if (!adminDoc.exists() && !isSignInPage) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, sendEmailVerification } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -49,6 +49,20 @@ export default function SignIn() {
         password
       );
 
+      // If email not verified, send verification and route to verify page
+      await userCredential.user.reload();
+      if (!userCredential.user.emailVerified) {
+        try {
+          await sendEmailVerification(userCredential.user);
+        } catch (err) {
+          console.error("Error sending verification email:", err);
+        }
+        setError("Please verify your email to continue. We just sent a verification email.");
+        router.push("/verify-email");
+        setLoading(false);
+        return;
+      }
+
       // Update session cookie (this will also check admin status)
       await updateSessionCookie();
       
@@ -90,6 +104,17 @@ export default function SignIn() {
         const result = await getRedirectResult(auth);
         if (result && result.user) {
           const user = result.user;
+          await user.reload();
+          if (!user.emailVerified) {
+            try {
+              await sendEmailVerification(user);
+            } catch (err) {
+              console.error("Error sending verification email:", err);
+            }
+            setError("Please verify your email to continue. We just sent a verification email.");
+            router.push("/verify-email");
+            return;
+          }
           
           // Create or update user document in Firestore
           await createOrUpdateUserDocument(user);

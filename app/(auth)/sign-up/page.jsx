@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createUserWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
@@ -70,7 +70,12 @@ export default function SignUp() {
         creditScore: 100, // Initial credit score
         createdAt: new Date().toISOString(),
       });
-      router.push("/sign-in");
+      try {
+        await sendEmailVerification(userCredential.user);
+      } catch (err) {
+        console.error("Error sending verification email:", err);
+      }
+      router.push("/verify-email");
     } catch (error) {
       switch (error.code) {
         case "auth/email-already-in-use":
