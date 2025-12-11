@@ -64,83 +64,85 @@ export default function TradingForm({
   const { expectedProfit, totalAmount } = calculateProfit();
 
   return (
-    <form onSubmit={handleSubmit} className="px-4">
-      <div className="space-y-3">
-        <Label>Select Duration</Label>
-        <div className="overflow-x-auto pb-2 -mx-4 px-4">
-          <div className="flex gap-2 min-w-max sm:grid sm:grid-cols-4 sm:min-w-0">
-            {TIME_OPTIONS.map((option) => {
-              const isSelected = selectedTime === option.value;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setSelectedTime(option.value)}
-                  className={`
-                    flex-shrink-0 w-[80px] sm:w-auto p-3 rounded-lg border-2 transition-all text-sm font-medium
-                    ${
-                      isSelected
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-background hover:bg-secondary"
-                    }
-                  `}
-                >
-                  <div className="text-center">
-                    <div className="font-semibold text-xs sm:text-sm">{option.displayLabel}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {option.profit}%
+    <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
+      <div className="space-y-4 pb-4">
+        <div className="space-y-3">
+          <Label>Select Duration</Label>
+          <div className="overflow-x-auto pb-2 -mx-4 px-4">
+            <div className="flex gap-2 min-w-max sm:grid sm:grid-cols-4 sm:min-w-0">
+              {TIME_OPTIONS.map((option) => {
+                const isSelected = selectedTime === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setSelectedTime(option.value)}
+                    className={`
+                      flex-shrink-0 w-[80px] sm:w-auto p-3 rounded-lg border-2 transition-all text-sm font-medium
+                      ${
+                        isSelected
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border bg-background hover:bg-secondary"
+                      }
+                    `}
+                  >
+                    <div className="text-center">
+                      <div className="font-semibold text-xs sm:text-sm">{option.displayLabel}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {option.profit}%
+                      </div>
                     </div>
-                  </div>
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="p-3 bg-secondary rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 text-sm">
+              <span className="text-muted-foreground">Selected:</span>
+              <span className="font-semibold">
+                {getTimeDetails().displayLabel} - {getTimeDetails().profit}% Profit
+              </span>
+            </div>
           </div>
         </div>
-        <div className="p-3 bg-secondary rounded-lg">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 text-sm">
-            <span className="text-muted-foreground">Selected:</span>
-            <span className="font-semibold">
-              {getTimeDetails().displayLabel} - {getTimeDetails().profit}% Profit
-            </span>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Amount (USD)</Label>
+            <Input
+              type="number"
+              placeholder="Enter amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              min="0"
+              step="0.01"
+              required
+            />
           </div>
-        </div>
-      </div>
 
-      <div className="space-y-4 mt-4">
-        <div className="space-y-2">
-          <Label>Amount (USD)</Label>
-          <Input
-            type="number"
-            placeholder="Enter amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            min="0"
-            step="0.01"
-            required
-          />
-        </div>
-
-        {amount && (
-          <div className="space-y-2 p-4 bg-secondary rounded-lg">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Expected Profit:</span>
-              <span className="font-semibold text-green-500">+${expectedProfit.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Total Return:</span>
-              <span className="font-semibold">${totalAmount.toFixed(2)}</span>
-            </div>
-            <div className="pt-2 border-t border-border/50">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-muted-foreground">Duration:</span>
-                <span className="font-medium">{formatDuration(getTimeDetails().duration)}</span>
+          {amount && (
+            <div className="space-y-2 p-4 bg-secondary rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Expected Profit:</span>
+                <span className="font-semibold text-green-500">+${expectedProfit.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Total Return:</span>
+                <span className="font-semibold">${totalAmount.toFixed(2)}</span>
+              </div>
+              <div className="pt-2 border-t border-border/50">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-muted-foreground">Duration:</span>
+                  <span className="font-medium">{formatDuration(getTimeDetails().duration)}</span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      <DrawerFooter className="px-0">
+      <DrawerFooter className="px-0 pb-safe">
         <Button
           type="submit"
           variant={variant}
@@ -156,7 +158,7 @@ export default function TradingForm({
             `TRADE ${direction?.toUpperCase()}`
           )}
         </Button>
-        <Button variant="outline" onClick={onClose}>
+        <Button variant="outline" onClick={onClose} className="w-full">
           Cancel
         </Button>
       </DrawerFooter>

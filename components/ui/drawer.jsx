@@ -43,11 +43,11 @@ const DrawerContent = React.forwardRef(({ className, children, side, ...props },
         className={cn(
           isLeft
             ? "fixed left-0 top-0 z-50 h-full w-[280px] flex flex-col border-r bg-background"
-            : "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+            : "fixed inset-x-0 bottom-0 z-50 mt-24 flex flex-col rounded-t-[10px] border bg-background overflow-hidden",
           className
         )}
         {...props}>
-        {!isLeft && <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />}
+        {!isLeft && <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted flex-shrink-0" />}
         {children}
       </DrawerPrimitive.Content>
     </DrawerPortal>
@@ -69,7 +69,7 @@ const DrawerFooter = ({
   className,
   ...props
 }) => (
-  <div className={cn("mt-auto flex flex-col gap-2 p-4", className)} {...props} />
+  <div className={cn("mt-auto flex flex-col gap-2 p-4 flex-shrink-0", className)} {...props} />
 )
 DrawerFooter.displayName = "DrawerFooter"
 

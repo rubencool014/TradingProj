@@ -203,13 +203,13 @@ export default function Trade() {
       </div>
 
       <Drawer open={showDrawer} onOpenChange={setShowDrawer}>
-        <DrawerContent>
-          <div className="mx-auto w-full max-w-[500px] px-4 m-6">
-            <DrawerHeader>
-              <DrawerTitle>
-                TRADE {selectedPair?.symbol} {tradeDirection?.toUpperCase()}
-              </DrawerTitle>
-            </DrawerHeader>
+        <DrawerContent className="max-h-[90vh] flex flex-col">
+          <DrawerHeader className="flex-shrink-0">
+            <DrawerTitle>
+              TRADE {selectedPair?.symbol} {tradeDirection?.toUpperCase()}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="flex-1 overflow-y-auto px-4">
             <TradingForm
               pair={selectedPair}
               direction={tradeDirection}
