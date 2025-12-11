@@ -22,7 +22,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Search, RefreshCcw, MessageSquare } from "lucide-react";
 
 export default function AdminFeedback() {
@@ -123,7 +122,6 @@ export default function AdminFeedback() {
                 <TableHead>User Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Feedback</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Submitted At</TableHead>
               </TableRow>
             </TableHeader>
@@ -138,19 +136,6 @@ export default function AdminFeedback() {
                     <p className="text-sm whitespace-pre-wrap break-words">
                       {feedback.feedback}
                     </p>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        feedback.status === "new"
-                          ? "default"
-                          : feedback.status === "read"
-                          ? "secondary"
-                          : "outline"
-                      }
-                    >
-                      {feedback.status || "new"}
-                    </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {formatDate(feedback.createdAt)}
