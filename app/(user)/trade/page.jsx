@@ -51,10 +51,21 @@ export default function Trade() {
       // Ensure cookie is set
       await updateSessionCookie();
       
-      // Fetch user data
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        setUserData(userDoc.data());
+      // Fetch user data with error handling
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setUserData(userDoc.data());
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        if (error.code === "failed-precondition" || error.message?.includes("offline")) {
+          toast({
+            title: "Connection Error",
+            description: "Please check your internet connection and try again.",
+            variant: "destructive",
+          });
+        }
       }
     });
 

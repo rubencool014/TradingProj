@@ -14,13 +14,18 @@ export default function PortfolioBalance() {
     const fetchBalance = async () => {
       if (!auth.currentUser) return;
 
-      const balanceDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
-      if (balanceDoc.exists()) {
-        const data = balanceDoc.data();
-        setBalance({
-          usd: data.balance?.usd || 0,
-          btc: data.balance?.btc || 0,
-        });
+      try {
+        const balanceDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+        if (balanceDoc.exists()) {
+          const data = balanceDoc.data();
+          setBalance({
+            usd: data.balance?.usd || 0,
+            btc: data.balance?.btc || 0,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+        // Silently fail - component will show default values
       }
     };
 
