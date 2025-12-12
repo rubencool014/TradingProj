@@ -26,7 +26,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { updateSessionCookie, createOrUpdateUserDocument } from "@/utils/auth";
+import { updateSessionCookie, createOrUpdateUserDocument, isProfileComplete } from "@/utils/auth";
 import { getNames } from "country-list";
 
 const SECURITY_QUESTIONS = [
@@ -260,6 +260,13 @@ export default function SignUp() {
           // Wait a bit to ensure cookie is set before navigation
           await new Promise(resolve => setTimeout(resolve, 100));
 
+          // Check if profile is complete
+          const profileComplete = await isProfileComplete(user.uid);
+          if (!profileComplete) {
+            router.push("/complete-profile");
+            return;
+          }
+
           // Check if user is admin for routing
           const adminDoc = await getDoc(doc(db, "admins", user.uid));
           const isAdmin = adminDoc.exists();
@@ -309,6 +316,13 @@ export default function SignUp() {
       
       // Wait a bit to ensure cookie is set before navigation
       await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Check if profile is complete
+      const profileComplete = await isProfileComplete(user.uid);
+      if (!profileComplete) {
+        router.push("/complete-profile");
+        return;
+      }
 
       // Check if user is admin for routing
       const adminDoc = await getDoc(doc(db, "admins", user.uid));

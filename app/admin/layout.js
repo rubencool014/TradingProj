@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { isProfileComplete } from "@/utils/auth";
 import Sidebar from "@/components/admin/sidebar";
 import Navbar from "@/components/admin/navbar";
 import Image from "next/image";
@@ -14,6 +15,7 @@ export default function AdminLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const isSignInPage = pathname === "/sign-in";
+  const isCompleteProfilePage = pathname === "/complete-profile";
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -24,22 +26,36 @@ export default function AdminLayout({ children }) {
       }
 
       if (user) {
-        if (!user.emailVerified) {
+        if (!user.emailVerified && !isCompleteProfilePage) {
           router.push("/verify-email");
           setLoading(false);
           return;
         }
 
+        // Check if profile is complete (skip check on complete-profile page)
+        if (!isCompleteProfilePage) {
+          try {
+            const profileComplete = await isProfileComplete(user.uid);
+            if (!profileComplete) {
+              router.push("/complete-profile");
+              setLoading(false);
+              return;
+            }
+          } catch (error) {
+            console.error("Error checking profile completion:", error);
+          }
+        }
+
         try {
           const adminDoc = await getDoc(doc(db, "admins", user.uid));
-          if (!adminDoc.exists() && !isSignInPage) {
+          if (!adminDoc.exists() && !isSignInPage && !isCompleteProfilePage) {
             router.push("/sign-in");
           } else {
             setIsAdmin(true);
           }
         } catch (error) {
           console.error("Error checking admin status:", error);
-          if (!isSignInPage) {
+          if (!isSignInPage && !isCompleteProfilePage) {
             router.push("/sign-in");
           }
         }
@@ -49,7 +65,7 @@ export default function AdminLayout({ children }) {
     });
 
     return () => unsubscribe();
-  }, [router, isSignInPage]);
+  }, [router, isSignInPage, isCompleteProfilePage]);
 
   // Show loading state
   if (loading) {
@@ -66,8 +82,8 @@ export default function AdminLayout({ children }) {
     );
   }
 
-  // Show sign in page without layout
-  if (isSignInPage) {
+  // Show sign in or complete profile page without layout
+  if (isSignInPage || isCompleteProfilePage) {
     return children;
   }
 

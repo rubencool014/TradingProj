@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, sendEmailVerification } from "firebase/auth";
+import { useToast } from "@/hooks/use-toast";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -19,7 +20,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { updateSessionCookie, createOrUpdateUserDocument } from "@/utils/auth";
+import { updateSessionCookie, createOrUpdateUserDocument, isProfileComplete } from "@/utils/auth";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -28,6 +29,7 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
   
   // Configure Google Auth Provider
   const googleProvider = new GoogleAuthProvider();
@@ -125,6 +127,13 @@ export default function SignIn() {
           // Wait a bit to ensure cookie is set before navigation
           await new Promise(resolve => setTimeout(resolve, 100));
 
+          // Check if profile is complete
+          const profileComplete = await isProfileComplete(user.uid);
+          if (!profileComplete) {
+            router.push("/complete-profile");
+            return;
+          }
+
           // Check if user is admin for routing
           const adminDoc = await getDoc(doc(db, "admins", user.uid));
           const isAdmin = adminDoc.exists();
@@ -174,6 +183,13 @@ export default function SignIn() {
       
       // Wait a bit to ensure cookie is set before navigation
       await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Check if profile is complete
+      const profileComplete = await isProfileComplete(user.uid);
+      if (!profileComplete) {
+        router.push("/complete-profile");
+        return;
+      }
 
       // Check if user is admin for routing
       const adminDoc = await getDoc(doc(db, "admins", user.uid));
@@ -240,7 +256,15 @@ export default function SignIn() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <Link
+                      href="/forgot-password"
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
                   <Input
                     id="password"
                     type="password"

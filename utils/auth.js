@@ -4,6 +4,31 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import Cookies from "js-cookie";
 
 /**
+ * Checks if a user profile is complete (has all required fields)
+ */
+export async function isProfileComplete(userId) {
+  try {
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (!userDoc.exists()) {
+      return false;
+    }
+    
+    const userData = userDoc.data();
+    return !!(
+      userData.fullName &&
+      userData.username &&
+      userData.gender &&
+      userData.country &&
+      userData.securityQuestion &&
+      userData.securityAnswer
+    );
+  } catch (error) {
+    console.error("Error checking profile completion:", error);
+    return false;
+  }
+}
+
+/**
  * Ensures the current user has a valid token before making API calls
  * This helps prevent authentication errors
  */
@@ -85,7 +110,7 @@ export async function createOrUpdateUserDocument(user) {
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
-      // User doesn't exist, create new user document
+      // User doesn't exist, create new user document with minimal data
       const timestamp = Date.now();
       const uniqueId = `${timestamp.toString().slice(-4).padStart(4, "0")}`;
       
@@ -98,6 +123,8 @@ export async function createOrUpdateUserDocument(user) {
         },
         creditScore: 100, // Initial credit score
         createdAt: new Date().toISOString(),
+        // Profile incomplete - will need to complete profile
+        profileComplete: false,
       });
     } else {
       // User exists, update email/name if they've changed
@@ -111,6 +138,17 @@ export async function createOrUpdateUserDocument(user) {
       if (user.displayName && userData.name !== user.displayName) {
         updates.name = user.displayName;
       }
+      
+      // Check if profile is complete
+      const profileComplete = !!(
+        userData.fullName &&
+        userData.username &&
+        userData.gender &&
+        userData.country &&
+        userData.securityQuestion &&
+        userData.securityAnswer
+      );
+      updates.profileComplete = profileComplete;
       
       if (Object.keys(updates).length > 0) {
         await setDoc(userRef, updates, { merge: true });

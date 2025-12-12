@@ -4,7 +4,7 @@ export async function middleware(request) {
   const path = request.nextUrl.pathname;
 
   // Public paths that don't require authentication
-  const publicPaths = ["/", "/explore", "/sign-in", "/sign-up"];
+  const publicPaths = ["/", "/explore", "/sign-in", "/sign-up", "/forgot-password", "/complete-profile"];
   
   // Setup path - accessible to authenticated users (for first admin creation)
   const setupPath = "/setup-admin";
