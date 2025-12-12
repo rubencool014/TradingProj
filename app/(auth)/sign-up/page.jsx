@@ -378,17 +378,17 @@ export default function SignUp() {
               )}
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name *</Label>
-                  <Input
+                <Input
                     id="fullName"
-                    type="text"
-                    placeholder="John Doe"
+                  type="text"
+                  placeholder="John Doe"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    required
-                  />
-                </div>
+                  required
+                />
+              </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="username">Username *</Label>
@@ -417,17 +417,17 @@ export default function SignUp() {
                   </p>
                 </div>
 
-                <div className="space-y-2">
+              <div className="space-y-2">
                   <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender *</Label>
@@ -503,16 +503,16 @@ export default function SignUp() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="password">Password *</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
                   <p className="text-xs text-muted-foreground">
-                    Must be at least 6 characters long
-                  </p>
+                  Must be at least 6 characters long
+                </p>
                 </div>
 
                 <div className="space-y-2">

@@ -55,7 +55,13 @@ export default function AdminChat() {
 
   useEffect(() => {
     if (scrollRef.current && messages.length > 0) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      // ScrollArea uses Radix UI, need to access the viewport
+      const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        setTimeout(() => {
+          viewport.scrollTop = viewport.scrollHeight;
+        }, 100);
+      }
     }
   }, [messages]);
 
@@ -173,21 +179,21 @@ export default function AdminChat() {
   );
 
   return (
-    <div className="p-2 sm:p-4 lg:p-6 h-[calc(100vh-4rem)] flex flex-col overflow-hidden max-w-[1400px] mx-auto w-full">
-      <div className="flex items-center gap-2 mb-3 sm:mb-4 flex-shrink-0 px-2 sm:px-0">
+    <div className="p-4 sm:p-6 h-full max-w-[1400px] mx-auto">
+      <div className="flex items-center gap-2 mb-4 flex-shrink-0">
         <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />
         <h1 className="text-lg sm:text-xl lg:text-2xl font-bold">User Chats</h1>
       </div>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-4 min-h-0 overflow-hidden px-2 sm:px-0">
-        {/* Chat List */}
-        <Card className={`lg:col-span-1 flex flex-col ${selectedChat ? 'hidden lg:flex' : 'flex'}`}>
-          <CardHeader className="pb-2 sm:pb-3 flex-shrink-0">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100%-3rem)]">
+        {/* Chat List - Always visible on desktop, toggle on mobile */}
+        <Card className={`flex flex-col h-full ${selectedChat ? 'hidden lg:flex' : 'flex'}`}>
+          <CardHeader className="pb-3 flex-shrink-0">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search chats..."
-                className="pl-8 text-sm sm:text-base"
+                className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -197,15 +203,15 @@ export default function AdminChat() {
             <ScrollArea className="h-full">
               <div className="space-y-1 p-2">
                 {filteredChats.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-6 sm:py-8">
-                    <p className="text-sm sm:text-base">No chats found</p>
+                  <div className="text-center text-muted-foreground py-8">
+                    <p>No chats found</p>
                   </div>
                 ) : (
                   filteredChats.map((chat) => (
                     <div
                       key={chat.id}
                       onClick={() => handleSelectChat(chat)}
-                      className={`p-2 sm:p-3 rounded-lg cursor-pointer transition-colors ${
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
                         selectedChat?.id === chat.id
                           ? "bg-primary text-primary-foreground"
                           : "hover:bg-secondary"
@@ -213,7 +219,7 @@ export default function AdminChat() {
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold truncate text-sm sm:text-base">
+                          <p className="font-semibold truncate">
                             {chat.userName || "Unknown User"}
                           </p>
                           <p className="text-xs opacity-70 truncate">
@@ -245,11 +251,11 @@ export default function AdminChat() {
           </CardContent>
         </Card>
 
-        {/* Chat Window */}
-        <Card className={`lg:col-span-2 flex flex-col ${selectedChat ? 'flex' : 'hidden lg:flex'}`}>
+        {/* Chat Window - Always visible on desktop, toggle on mobile */}
+        <Card className={`flex flex-col h-full lg:col-span-2 ${selectedChat ? 'flex' : 'hidden lg:flex'}`}>
           {selectedChat ? (
             <>
-              <CardHeader className="border-b pb-2 sm:pb-3 flex-shrink-0">
+              <CardHeader className="border-b pb-3 flex-shrink-0">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -261,11 +267,11 @@ export default function AdminChat() {
                       >
                         <ArrowLeft className="h-4 w-4" />
                       </Button>
-                      <p className="text-base sm:text-lg font-semibold truncate">
+                      <p className="text-lg font-semibold truncate">
                         {selectedChat.userName || "Unknown User"}
                       </p>
                     </div>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                    <p className="text-sm text-muted-foreground truncate">
                       {selectedChat.userEmail}
                     </p>
                   </div>
@@ -278,12 +284,12 @@ export default function AdminChat() {
               </CardHeader>
 
               <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0">
-                <ScrollArea className="flex-1 px-2 sm:px-4 py-2 sm:py-4" ref={scrollRef}>
-                  <div className="space-y-3 sm:space-y-4">
+                <ScrollArea className="flex-1 px-4 py-4" ref={scrollRef}>
+                  <div className="space-y-4">
                     {messages.length === 0 ? (
-                      <div className="text-center text-muted-foreground py-6 sm:py-8">
-                        <MessageSquare className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-50" />
-                        <p className="text-sm sm:text-base">No messages yet</p>
+                      <div className="text-center text-muted-foreground py-8">
+                        <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No messages yet</p>
                       </div>
                     ) : (
                       messages.map((msg, index) => (
@@ -294,18 +300,18 @@ export default function AdminChat() {
                           }`}
                         >
                           <div
-                            className={`max-w-[85%] sm:max-w-[80%] rounded-lg px-3 sm:px-4 py-2 ${
+                            className={`max-w-[80%] rounded-lg px-4 py-2 ${
                               msg.sender === "admin"
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted"
                             }`}
                           >
-                            <p className="text-xs sm:text-sm font-medium mb-1 opacity-70">
+                            <p className="text-sm font-medium mb-1 opacity-70">
                               {msg.senderName}
                             </p>
-                            <p className="text-xs sm:text-sm break-words">{msg.text}</p>
+                            <p className="text-sm break-words">{msg.text}</p>
                             <p
-                              className={`text-[10px] sm:text-xs mt-1 ${
+                              className={`text-xs mt-1 ${
                                 msg.sender === "admin"
                                   ? "text-primary-foreground/70"
                                   : "text-muted-foreground"
@@ -320,30 +326,38 @@ export default function AdminChat() {
                   </div>
                 </ScrollArea>
 
-                <form
-                  onSubmit={handleSendMessage}
-                  className="px-2 sm:px-4 pb-2 sm:pb-4 pt-2 sm:pt-4 border-t flex-shrink-0"
-                >
-                  <div className="flex gap-2">
-                    <Input
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Type your message..."
-                      disabled={loading}
-                      className="flex-1 text-sm sm:text-base"
-                    />
-                    <Button type="submit" disabled={loading || !message.trim()} size="icon" className="shrink-0">
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </form>
+                <div className="border-t bg-background flex-shrink-0">
+                  <form
+                    onSubmit={handleSendMessage}
+                    className="p-4"
+                  >
+                    <div className="flex gap-3">
+                      <Input
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Type your message..."
+                        disabled={loading}
+                        className="flex-1 h-11"
+                      />
+                      <Button 
+                        type="submit" 
+                        disabled={loading || !message.trim()} 
+                        size="default"
+                        className="shrink-0 h-11 px-6"
+                      >
+                        <Send className="h-5 w-5 mr-2" />
+                        Send
+                      </Button>
+                    </div>
+                  </form>
+                </div>
               </CardContent>
             </>
           ) : (
             <CardContent className="flex-1 flex items-center justify-center">
               <div className="text-center text-muted-foreground">
-                <MessageSquare className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-50" />
-                <p className="text-sm sm:text-base">Select a chat to start messaging</p>
+                <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Select a chat to start messaging</p>
               </div>
             </CardContent>
           )}
