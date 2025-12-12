@@ -94,37 +94,38 @@ export default function FeedbackDialog({ open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Submit Feedback</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="w-[95vw] sm:w-full sm:max-w-[420px] max-h-[90vh] m-4 sm:m-6 mx-auto">
+        <DialogHeader className="px-4 sm:px-5">
+          <DialogTitle className="text-lg sm:text-xl">Submit Feedback</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base">
             We'd love to hear your thoughts! Please share your feedback below.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
+          <div className="space-y-4 py-4 px-4 sm:px-5 flex-1 overflow-y-auto">
             <div className="space-y-2">
-              <Label htmlFor="feedback">Your Feedback</Label>
+              <Label htmlFor="feedback" className="text-sm sm:text-base">Your Feedback</Label>
               <Textarea
                 id="feedback"
                 placeholder="Enter your feedback here..."
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 rows={6}
-                className="resize-none"
+                className="resize-none text-sm sm:text-base min-h-[120px] sm:min-h-[150px]"
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 px-4 sm:px-5">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full sm:w-auto order-1 sm:order-2">
               {loading ? "Submitting..." : "Submit Feedback"}
             </Button>
           </DialogFooter>

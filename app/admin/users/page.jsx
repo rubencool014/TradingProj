@@ -47,7 +47,10 @@ export default function AdminUsers() {
   const filteredUsers = users.filter(
     (user) =>
       user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.userId?.toLowerCase().includes(searchQuery.toLowerCase())
+      user.userId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleRefresh = () => {
@@ -84,8 +87,14 @@ export default function AdminUsers() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
+              <TableHead>Full Name</TableHead>
+              <TableHead>Username</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Gender</TableHead>
+              <TableHead>Country</TableHead>
+              <TableHead>Security Question</TableHead>
+              <TableHead>Security Answer</TableHead>
+              <TableHead>Referral Code</TableHead>
               <TableHead>User ID</TableHead>
               <TableHead>Balance</TableHead>
               <TableHead>Credit Score</TableHead>
@@ -97,8 +106,22 @@ export default function AdminUsers() {
           <TableBody>
             {filteredUsers.map((user) => (
               <TableRow key={user.id}>
-                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.fullName || user.name || "N/A"}</TableCell>
+                <TableCell className="font-mono text-sm">{user.username || "N/A"}</TableCell>
                 <TableCell>{user.email}</TableCell>
+                <TableCell className="capitalize">{user.gender || "N/A"}</TableCell>
+                <TableCell>{user.country || "N/A"}</TableCell>
+                <TableCell className="max-w-xs">
+                  <div className="text-xs truncate" title={user.securityQuestion}>
+                    {user.securityQuestion || "N/A"}
+                  </div>
+                </TableCell>
+                <TableCell className="max-w-xs">
+                  <div className="text-xs truncate font-mono" title={user.securityAnswer}>
+                    {user.securityAnswer ? "••••••" : "N/A"}
+                  </div>
+                </TableCell>
+                <TableCell className="font-mono text-sm">{user.referralCode || "N/A"}</TableCell>
                 <TableCell>{user.userId}</TableCell>
                 <TableCell>${user.balance.usd}</TableCell>
                 <TableCell>{user.creditScore}</TableCell>

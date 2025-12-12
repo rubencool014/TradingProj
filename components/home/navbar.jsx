@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { UserCircle, Wallet, Menu, X, MessageSquare } from "lucide-react";
+import { UserCircle, Wallet, Menu, X, FileText, MessageCircle } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 import {
@@ -20,6 +20,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Home, Globe, LineChart, BarChart2 } from "lucide-react";
 import FeedbackDialog from "@/components/feedback/feedback-dialog";
+import UserChat from "@/components/chat/user-chat";
 
 const sidebarItems = [
   { name: "Home", href: "/", icon: Home },
@@ -111,15 +112,18 @@ export default function Navbar() {
             </div>
           )}
           {user && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setFeedbackDialogOpen(true)}
-              title="Submit Feedback"
-            >
-              <MessageSquare className="h-5 w-5" />
-              <span className="sr-only">Feedback</span>
-            </Button>
+            <>
+              <UserChat />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setFeedbackDialogOpen(true)}
+                title="Submit Feedback"
+              >
+                <FileText className="h-5 w-5" />
+                <span className="sr-only">Feedback</span>
+              </Button>
+            </>
           )}
           <ThemeToggle />
           <Button variant="ghost" size="icon" asChild>

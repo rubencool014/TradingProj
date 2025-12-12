@@ -142,7 +142,7 @@ export default function TradingForm({
         </div>
       </div>
 
-      <DrawerFooter className="px-0 pb-safe">
+      <DrawerFooter className="px-0 pb-4">
         <Button
           type="submit"
           variant={variant}

@@ -4,12 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Users, LineChart, MessageSquare, Wallet } from "lucide-react";
+import { Users, LineChart, FileText, Wallet, MessageCircle } from "lucide-react";
 
 const sidebarItems = [
   { name: "Trades", href: "/admin/trades", icon: LineChart },
   { name: "Users", href: "/admin/users", icon: Users },
-  { name: "Feedback", href: "/admin/feedback", icon: MessageSquare },
+  { name: "Feedback", href: "/admin/feedback", icon: FileText },
+  { name: "Chat", href: "/admin/chat", icon: MessageCircle },
   { name: "Withdrawals", href: "/admin/withdrawals", icon: Wallet },
 ];
 

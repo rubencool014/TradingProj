@@ -17,6 +17,7 @@ export async function middleware(request) {
     "/admin/users",
     "/admin/manage",
     "/admin/feedback",
+    "/admin/chat",
     "/admin/withdrawals",
   ];
 

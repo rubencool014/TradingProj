@@ -2,12 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { createUserWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, sendEmailVerification } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -17,16 +24,43 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { updateSessionCookie, createOrUpdateUserDocument } from "@/utils/auth";
+import { getNames } from "country-list";
+
+const SECURITY_QUESTIONS = [
+  "What was the name of your first pet?",
+  "What city were you born in?",
+  "What was your mother's maiden name?",
+  "What was the name of your elementary school?",
+  "What was your childhood nickname?",
+  "What is your favorite movie?",
+  "What was the make of your first car?",
+  "What is the name of your best friend?",
+  "What is your favorite food?",
+  "What was the name of your first teacher?",
+];
+
+// Get all country names from the library and sort them alphabetically
+const countryNames = getNames();
+const COUNTRIES = Object.values(countryNames).sort();
 
 export default function SignUp() {
-  const [name, setName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [gender, setGender] = useState("");
+  const [country, setCountry] = useState("");
+  const [securityQuestion, setSecurityQuestion] = useState("");
+  const [securityAnswer, setSecurityAnswer] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState(null);
   const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
   
@@ -38,10 +72,99 @@ export default function SignUp() {
     prompt: 'select_account'
   });
 
+  // Check username uniqueness
+  useEffect(() => {
+    const checkUsername = async () => {
+      if (!username || username.length < 3) {
+        setUsernameAvailable(null);
+        return;
+      }
+
+      // Basic validation
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        setUsernameAvailable(false);
+        setError("Username can only contain letters, numbers, and underscores");
+        return;
+      }
+
+      setCheckingUsername(true);
+      try {
+        const usernameQuery = query(
+          collection(db, "users"),
+          where("username", "==", username.toLowerCase())
+        );
+        const snapshot = await getDocs(usernameQuery);
+        setUsernameAvailable(snapshot.empty);
+        if (!snapshot.empty) {
+          setError("Username is already taken");
+        } else {
+          setError("");
+        }
+      } catch (error) {
+        console.error("Error checking username:", error);
+        setUsernameAvailable(null);
+      } finally {
+        setCheckingUsername(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(checkUsername, 500);
+    return () => clearTimeout(debounceTimer);
+  }, [username]);
+
   const handleSignUp = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    // Validation
+    if (!fullName.trim()) {
+      setError("Full name is required");
+      setLoading(false);
+      return;
+    }
+
+    if (!username.trim() || username.length < 3) {
+      setError("Username must be at least 3 characters long");
+      setLoading(false);
+      return;
+    }
+
+    if (usernameAvailable === false) {
+      setError("Username is already taken");
+      setLoading(false);
+      return;
+    }
+
+    if (!email.trim()) {
+      setError("Email is required");
+      setLoading(false);
+      return;
+    }
+
+    if (!gender) {
+      setError("Please select your gender");
+      setLoading(false);
+      return;
+    }
+
+    if (!country) {
+      setError("Please select your country");
+      setLoading(false);
+      return;
+    }
+
+    if (!securityQuestion) {
+      setError("Please select a security question");
+      setLoading(false);
+      return;
+    }
+
+    if (!securityAnswer.trim()) {
+      setError("Please provide an answer to the security question");
+      setLoading(false);
+      return;
+    }
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters long");
@@ -49,7 +172,25 @@ export default function SignUp() {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
     try {
+      // Final username check before creating account
+      const usernameQuery = query(
+        collection(db, "users"),
+        where("username", "==", username.toLowerCase())
+      );
+      const snapshot = await getDocs(usernameQuery);
+      if (!snapshot.empty) {
+        setError("Username is already taken. Please choose another one.");
+        setLoading(false);
+        return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -61,8 +202,15 @@ export default function SignUp() {
       const uniqueId = `${timestamp.toString().slice(-4).padStart(4, "0")}`;
 
       await setDoc(doc(db, "users", userCredential.user.uid), {
-        name,
-        email,
+        fullName: fullName.trim(),
+        username: username.toLowerCase().trim(),
+        name: fullName.trim(), // Keep for backward compatibility
+        email: email.trim().toLowerCase(),
+        gender,
+        country,
+        securityQuestion,
+        securityAnswer: securityAnswer.trim(),
+        referralCode: referralCode.trim() || null,
         userId: uniqueId,
         balance: {
           usd: 0,
@@ -196,8 +344,8 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary">
-      <div className="w-full max-w-md p-8">
+    <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
+      <div className="w-full max-w-2xl">
         <Card>
           <CardHeader>
             <CardTitle>Create Account</CardTitle>
@@ -206,7 +354,7 @@ export default function SignUp() {
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSignUp}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 max-h-[70vh] overflow-y-auto">
               {error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
@@ -214,44 +362,166 @@ export default function SignUp() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name *</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="John Doe"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username *</Label>
+                  <div className="relative">
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="johndoe123"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                      className={usernameAvailable === false ? "border-red-500" : usernameAvailable === true ? "border-green-500" : ""}
+                    />
+                    {checkingUsername && (
+                      <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+                    )}
+                    {username && !checkingUsername && usernameAvailable === true && (
+                      <span className="absolute right-3 top-2.5 text-green-500 text-xs">✓ Available</span>
+                    )}
+                    {username && !checkingUsername && usernameAvailable === false && (
+                      <span className="absolute right-3 top-2.5 text-red-500 text-xs">✗ Taken</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Must be at least 3 characters, letters, numbers, and underscores only
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="gender">Gender *</Label>
+                  <Select value={gender} onValueChange={setGender} required>
+                    <SelectTrigger id="gender">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country *</Label>
+                  <Select value={country} onValueChange={setCountry} required>
+                    <SelectTrigger id="country">
+                      <SelectValue placeholder="Select country" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[200px]">
+                      {COUNTRIES.map((countryName) => (
+                        <SelectItem key={countryName} value={countryName}>
+                          {countryName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="referralCode">Referral Code (Optional)</Label>
+                  <Input
+                    id="referralCode"
+                    type="text"
+                    placeholder="Enter referral code"
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value)}
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="name">What should we call you?</Label>
+                <Label htmlFor="securityQuestion">Security Question *</Label>
+                <Select value={securityQuestion} onValueChange={setSecurityQuestion} required>
+                  <SelectTrigger id="securityQuestion">
+                    <SelectValue placeholder="Select a security question" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[200px]">
+                    {SECURITY_QUESTIONS.map((question, index) => (
+                      <SelectItem key={index} value={question}>
+                        {question}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="securityAnswer">Security Answer *</Label>
                 <Input
-                  id="name"
+                  id="securityAnswer"
                   type="text"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your answer"
+                  value={securityAnswer}
+                  onChange={(e) => setSecurityAnswer(e.target.value)}
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <p className="text-sm text-muted-foreground">
-                  Must be at least 6 characters long
-                </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password *</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Must be at least 6 characters long
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className={confirmPassword && password !== confirmPassword ? "border-red-500" : confirmPassword && password === confirmPassword ? "border-green-500" : ""}
+                  />
+                  {confirmPassword && password !== confirmPassword && (
+                    <p className="text-xs text-red-500">Passwords do not match</p>
+                  )}
+                  {confirmPassword && password === confirmPassword && (
+                    <p className="text-xs text-green-500">Passwords match</p>
+                  )}
+                </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-2">
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full" disabled={loading || checkingUsername || usernameAvailable === false}>
                 {loading ? "Creating account..." : "Create account"}
               </Button>
               <div className="relative my-2">
