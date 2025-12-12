@@ -230,8 +230,8 @@ export default function AdminWithdrawals() {
                     ${parseFloat(withdrawal.amount || 0).toFixed(2)}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2 max-w-xs">
-                      <code className="text-xs break-all font-mono flex-1">
+                    <div className="flex items-center gap-2 max-w-[200px] lg:max-w-xs">
+                      <code className="text-xs break-all lg:break-normal font-mono flex-1 overflow-x-auto whitespace-nowrap lg:whitespace-normal scrollbar-thin">
                         {withdrawal.walletAddress}
                       </code>
                       <Button
