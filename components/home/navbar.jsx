@@ -98,11 +98,12 @@ export default function Navbar() {
           </Drawer>
         </div>
 
-        <div className="flex items-center gap-2 font-semibold" suppressHydrationWarning>
+        <Link href="/" className="flex items-center gap-2 font-semibold" suppressHydrationWarning>
           <div suppressHydrationWarning>
             <Image src="/main/logo.svg" alt="Logo" width={32} height={32} />
           </div>
-        </div>
+          <span className="hidden sm:inline-block text-base sm:text-lg">Secure Trade Pro</span>
+        </Link>
 
         <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
           {user && balance && (

@@ -7,8 +7,8 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Trading Simulation",
-  description: "A crypto trading simulation platform",
+  title: "Secure Trade Pro",
+  description: "A secure crypto trading platform",
 };
 
 export default function RootLayout({ children }) {

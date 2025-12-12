@@ -319,11 +319,12 @@ export default function Navbar() {
           </Drawer>
         </div>
 
-        <div className="flex items-center gap-2 font-semibold pr-4" suppressHydrationWarning>
+        <Link href="/admin" className="flex items-center gap-2 font-semibold pr-4" suppressHydrationWarning>
           <div suppressHydrationWarning>
             <Image src="/main/logo.svg" alt="Logo" width={32} height={32} />
           </div>
-        </div>
+          <span className="hidden sm:inline-block text-base sm:text-lg">Secure Trade Pro</span>
+        </Link>
         <div className="hidden sm:flex items-center gap-2 font-semibold fill-slate-400">
           Admin Dashboard
         </div>
